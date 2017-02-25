@@ -1,0 +1,27 @@
+{
+  "name": "brew",
+  "version": "1.0.0",
+  "description": "The bot that will get your coffee",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "Coffee",
+    "Bot"
+  ],
+  "author": "32teeths",
+  "license": "ISC",
+  "dependencies": {
+    "@slack/client": "^3.8.1",
+    "botkit": "^0.4.9",
+    "cron": "^1.2.1",
+    "firebase": "^3.6.9",
+    "moment": "^2.17.1",
+    "node-schedule": "^1.2.0"
+  },
+  "engines": {
+    "node": "7.5.0",
+    "npm": "4.1.2"
+  }
+}
