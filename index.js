@@ -16,9 +16,9 @@ var moment = require('moment');
 
 // Firebase Config
 // Initialize Firebase
-console.log(process.env.firebaseConfig);
+console.log(JSON.parse(process.env.firebaseConfig));
 
-firebase.initializeApp(process.env.firebaseConfig);
+firebase.initializeApp(JSON.parse(process.env.firebaseConfig));
 
 // Endpoint to enable OAuth access for the app
 app.get('/OAuth', (req, res) => {
