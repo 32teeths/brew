@@ -33,10 +33,13 @@ app.get('/OAuth', (req, res) => {
     }
     // Redirect the request to url ,with the required params
     request(options, (error, response, body) => {
+        console.log(response);
         var JSONresponse = JSON.parse(body)
         if (!JSONresponse.ok) {
             res.send("Error encountered: \n" + JSON.stringify(JSONresponse)).status(200).end()
         } else {
+            var success = firebase.database().ref('config/');
+            success.set(response);
             res.send("Success!")
         }
     })
@@ -57,7 +60,7 @@ app.post('/coffee', urlencodedParser, (req, res) => {
         var url = 'https://slack.com/api/chat.postMessage?token=' + token + '&channel=C3J6S2HGB&text=Helo&pretty=1';
 
         request.get(url);
-        console.log(url,'to hit');
+        console.log(url, 'to hit');
         //https://slack.com/api/chat.postMessage?token=xoxp-120988635527-120375240740-145845048485-070b92ac9dfa33327a8d3e00e7cdd680&channel=C3J6S2HGB&text=ther%3F%20now%20&pretty=1
     }
 
