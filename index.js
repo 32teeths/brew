@@ -26,7 +26,7 @@ app.get('/OAuth', (req, res) => {
         uri: 'https://slack.com/api/oauth.access?code='
         + req.query.code +
         '&client_id=' + process.env.clientId +
-        '&client_secret=' + prcess.env.clientSecret +
+        '&client_secret=' + process.env.clientSecret +
         '&redirect_uri=' + 'https://slackbrew.herokuapp.com/OAuth' +
         '&scope=incoming-webhook,commands,bot,chat.update',
         method: 'GET'
