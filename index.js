@@ -135,7 +135,7 @@ function sendMessageToSlackResponseURL(responseURL, JSONmessage) {
  * @param {any} res
  */
 function validRequest(reqBody, res) {
-    if (reqBody.token != verificationToken) {
+    if (reqBody.token != process.env.verificationToken) {
         res.status(403).end("Access forbidden")
         return false;
     } else {
