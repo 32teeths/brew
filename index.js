@@ -57,7 +57,7 @@ app.post('/coffee', urlencodedParser, (req, res) => {
     if (validRequest(reqBody, res)) {
         sendMessageToSlackResponseURL(responseURL, { replace_original: true, text: 'Well , hello that is saved' });
 
-        var url = 'https://slack.com/api/chat.postMessage?token=' + token + '&channel=C3J6S2HGB&text=Helo&pretty=1';
+        var url = 'https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=C3J6S2HGB&text=Helo&pretty=1';
 
         request.get(url);
         console.log(url, 'to hit');
