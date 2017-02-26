@@ -33,12 +33,12 @@ app.get('/OAuth', (req, res) => {
     }
     // Redirect the request to url ,with the required params
     request(options, (error, response, body) => {
-        console.log(response);
         var JSONresponse = JSON.parse(body)
         if (!JSONresponse.ok) {
             res.send("Error encountered: \n" + JSON.stringify(JSONresponse)).status(200).end()
         } else {
             var success = firebase.database().ref('config/');
+            console.log("Got success");
             success.set(response);
             res.send("Success!")
         }
