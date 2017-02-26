@@ -20,6 +20,8 @@ console.log(JSON.parse(process.env.firebaseConfig));
 
 firebase.initializeApp(JSON.parse(process.env.firebaseConfig));
 
+console.log(firebase.app().name);  // "[DEFAULT]"
+
 // Endpoint to enable OAuth access for the app
 app.get('/OAuth', (req, res) => {
     var options = {
@@ -37,7 +39,8 @@ app.get('/OAuth', (req, res) => {
         if (!JSONresponse.ok) {
             res.send("Error encountered: \n" + JSON.stringify(JSONresponse)).status(200).end()
         } else {
-            var success = firebase.database().ref('config/');
+            
+            firebase.database().ref('app/config').set(response);
             console.log("Got success");
             success.set(response);
             res.send("Success!")
