@@ -39,10 +39,9 @@ app.get('/OAuth', (req, res) => {
         if (!JSONresponse.ok) {
             res.send("Error encountered: \n" + JSON.stringify(JSONresponse)).status(200).end()
         } else {
-            
-            firebase.database().ref('app/config').set(response);
+            console.log(response);
+            // firebase.database().ref('app/config').set(response);
             console.log("Got success");
-            success.set(response);
             res.send("Success!")
         }
     })
