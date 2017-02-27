@@ -62,10 +62,18 @@ app.post('/coffee', urlencodedParser, (req, res) => {
         var url = 'https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=C3J6S2HGB&text=Helo&pretty=1';
 
         request.get(url);
-        console.log(url, 'to hit');
-        //https://slack.com/api/chat.postMessage?token=xoxp-120988635527-120375240740-145845048485-070b92ac9dfa33327a8d3e00e7cdd680&channel=C3J6S2HGB&text=ther%3F%20now%20&pretty=1
-    }
 
+        // // Find the people in the slack channel
+        // request.get('https://slack.com/api/channels.info?token=' + process.env.token + '&channel=C3J6S2HGB&pretty=1', function (error, response) {
+        //     // Iterating throught the members
+        //     for (var key = 0; key < response.channel.members.length - 1; key++) {
+        //         // Open the channel for each user 
+        //         request.get('https://slack.com/api/im.open?token=' + process.env.token + '&user=' + response.channel.members[key] + '&pretty=1', function (error, response) {
+
+        //         });
+        //     }
+        // });
+    }
 });
 
 app.post('/ask', urlencodedParser, (req, res) => {
@@ -107,7 +115,28 @@ app.post('/ask', urlencodedParser, (req, res) => {
                 }
             ]
         }
-        sendMessageToSlackResponseURL(responseURL, message)
+
+        console.log("Finding the users in the channel");
+
+        // Find the people in the slack channel
+        request.get('https://slack.com/api/channels.info?token=' + process.env.token + '&channel=C3J6S2HGB&pretty=1', function (error, response) {
+            // Iterating throught the members
+            console.log(response.channel.members, 'are the channels');
+
+            for (var key = 0; key < response.channel.members.length - 1; key++) {
+                // Open the channel for each user
+                console.log("Opening im.open for channel" + response.channel.members[key])
+                request.get('https://slack.com/api/im.open?token=' + process.env.token + '&user=' + response.channel.members[key] + '&pretty=1', function (error, response) {
+
+                    request.get('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + response.channel.id + '&text=Sending message to ' + response.channel.id + '&pretty=1', function (error, message) {
+                        console.log("message send");
+                    })
+                });
+            }
+        });
+
+
+        // sendMessageToSlackResponseURL(responseURL, message)
     }
 });
 
