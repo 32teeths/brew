@@ -121,8 +121,8 @@ app.post('/ask', urlencodedParser, (req, res) => {
         // Find the people in the slack channel
         request.get('https://slack.com/api/channels.info?token=' + process.env.token + '&channel=C3J6S2HGB&pretty=1', function (error, status, response) {
 
-            console.log(response);
-            
+            console.log(response.channel);
+
             // Iterating throught the members
             console.log(response.channel.members, 'are the channels');
 
