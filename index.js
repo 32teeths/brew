@@ -123,6 +123,8 @@ app.post('/ask', urlencodedParser, (req, res) => {
 
             var members = JSON.parse(response).channel.members;
 
+            console.log(response);
+
             console.log("memebers",members);
 
             for (var key = 0; key < members.length - 1; key++) {
