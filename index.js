@@ -127,6 +127,9 @@ app.post('/ask', urlencodedParser, (req, res) => {
                 // Open the channel for each user
                 console.log("Opening im.open for channel" + members[key])
                 request.get('https://slack.com/api/im.open?token=' + process.env.token + '&user=' + members[key] + '&pretty=1', function (error, status, response) {
+                    console.log(response);
+                    console.log("parsed");
+                    console.log(JSON.parse(response));
                     request.get('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id + '&text=Sending message to ' + JSON.parse(response).channel.id + '&pretty=1', function (error, status, response) {
                         console.log(JSON.parse(response), "message send");
                     })
