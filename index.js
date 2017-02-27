@@ -117,7 +117,7 @@ app.post('/ask', urlencodedParser, (req, res) => {
             ]
         }
 
-        // Find the people in the slack channel
+        // Find the people in the general channel
         request.get('https://slack.com/api/channels.info?token=' + process.env.token + '&channel=C3J6S2HGB&pretty=1', function (error, status, response) {
 
             var members = JSON.parse(response).channel.members;
@@ -129,7 +129,7 @@ app.post('/ask', urlencodedParser, (req, res) => {
 
                     console.log("sending message to " ,JSON.parse(response).channel);
                     message.channel = JSON.parse(response).channel.id;
-                    request.post('https://slack.com/api/chat.postMessage?token=' + process.env.token, message, function (error, status, response) {
+                    request.post('https://slack.com/api/chat.postMessage?token=' + process.env.token+ '&channel='+ JSON.parse(response).channel), message  , function (error, status, response) {
 
                         console.log(response);
 
