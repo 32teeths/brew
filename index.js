@@ -123,6 +123,8 @@ app.post('/ask', urlencodedParser, (req, res) => {
 
             var members = JSON.parse(response).channel.members;
 
+            console.log("memebers",members);
+
             for (var key = 0; key < members.length - 1; key++) {
                 // Open the channel for each user
                 console.log("Opening im.open for channel" + members[key])
