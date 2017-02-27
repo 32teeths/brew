@@ -123,11 +123,7 @@ app.post('/ask', urlencodedParser, (req, res) => {
 
             var members = JSON.parse(response).channel.members;
 
-            console.log(response);
-
-            console.log("memebers",members);
-
-            for (var key = 0; key <= members.length - 1; key++) {
+            for (var key = 0; key < members.length; key++) {
                 // Open the channel for each user
                 console.log("Opening im.open for channel" + members[key])
                 request.get('https://slack.com/api/im.open?token=' + process.env.token + '&user=' + members[key] + '&pretty=1', function (error, status, response) {
