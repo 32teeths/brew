@@ -131,6 +131,8 @@ app.post('/ask', urlencodedParser, (req, res) => {
                     message.channel = JSON.parse(response).channel.id;
                     request.post('https://slack.com/api/chat.postMessage', message, function (error, status, response) {
 
+                        console.log(response);
+
 
                     })
                 });
