@@ -124,14 +124,15 @@ app.post('/ask', urlencodedParser, (req, res) => {
 
             console.log("parsing");
 
-            console.log(JSON.parse(response));
+            // console.log(JSON.parse(response));
 
 
-            console.log(JSON.parse(response).channel);
-            var members = JSON.parse(response).channel;
+            console.log(JSON.parse(response).channel.members);
+            var members = JSON.parse(response).channel.members;
 
 
-            console.log(response);
+
+            // console.log(response);
 
             // Iterating throught the members
             console.log(members, 'are the channels');
