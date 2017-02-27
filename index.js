@@ -116,28 +116,21 @@ app.post('/ask', urlencodedParser, (req, res) => {
             ]
         }
 
-        console.log("Finding the users in the channel");
-
         // Find the people in the slack channel
         request.get('https://slack.com/api/channels.info?token=' + process.env.token + '&channel=C3J6S2HGB&pretty=1', function (error, status, response) {
 
             var members = JSON.parse(response).channel.members;
-
             for (var key = 0; key < members.length; key++) {
                 // Open the channel for each user
-                console.log("Opening im.open for channel" + members[key])
                 request.get('https://slack.com/api/im.open?token=' + process.env.token + '&user=' + members[key] + '&pretty=1', function (error, status, response) {
-                    console.log(response);
-                    console.log("parsed");
-                    console.log(JSON.parse(response));
-                    request.get('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id + '&text=Sending message to ' + JSON.parse(response).channel.id + '&pretty=1', function (error, status, response) {
-                        console.log(JSON.parse(response), "message send");
+                    // Send the interactive buttons
+                    // request.post('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id + '&text=Sending message to ' + JSON.parse(response).channel.id + '&pretty=1', message, function (error, status, response) {
+                    request.post('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id, message, function (error, status, response) {
+
                     })
                 });
             }
         });
-
-
         // sendMessageToSlackResponseURL(responseURL, message)
     }
 });
