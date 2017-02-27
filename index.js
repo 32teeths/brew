@@ -127,7 +127,7 @@ app.post('/ask', urlencodedParser, (req, res) => {
                     // Send the interactive buttons
                     // request.post('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id + '&text=Sending message to ' + JSON.parse(response).channel.id + '&pretty=1', message, function (error, status, response) {
 
-                    console.log("sending message to " + JSON.parse(response).channel);
+                    console.log("sending message to " ,JSON.parse(response).channel);
                     message.channel = JSON.parse(response).channel.id;
                     request.post('https://slack.com/api/chat.postMessage', message, function (error, status, response) {
 
