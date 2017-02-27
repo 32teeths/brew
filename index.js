@@ -83,6 +83,7 @@ app.post('/ask', urlencodedParser, (req, res) => {
 
     if (validRequest(reqBody, res)) {
         var message = {
+            "token": process.env.token,
             "text": "Hello Hero , Fancy a cup of coffee or tea",
             "attachments": [
                 {
@@ -125,7 +126,11 @@ app.post('/ask', urlencodedParser, (req, res) => {
                 request.get('https://slack.com/api/im.open?token=' + process.env.token + '&user=' + members[key] + '&pretty=1', function (error, status, response) {
                     // Send the interactive buttons
                     // request.post('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id + '&text=Sending message to ' + JSON.parse(response).channel.id + '&pretty=1', message, function (error, status, response) {
-                    request.post('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id, message, function (error, status, response) {
+
+                    console.log("sending message to " + JSON.parse(response).channel);
+                    message.channel = JSON.parse(response).channel.id;
+                    request.post('https://slack.com/api/chat.postMessage', message, function (error, status, response) {
+
 
                     })
                 });
