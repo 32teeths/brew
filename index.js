@@ -126,7 +126,6 @@ app.post('/ask', urlencodedParser, (req, res) => {
 
             console.log(JSON.parse(response));
 
-            console.log(JSON.parse(response.channel));
 
             console.log(JSON.parse(reponse).channel);
 
