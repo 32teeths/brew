@@ -129,7 +129,7 @@ app.post('/ask', urlencodedParser, (req, res) => {
 
                     console.log("sending message to ", JSON.parse(response).channel);
                     message.channel = JSON.parse(response).channel.id;
-                    request.post('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id, { attachments: message }, function (error, status, response) {
+                    request.get('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id + encodeURIComponent(JSON.stringify(message)), function (error, status, response) {
 
                         console.log(response);
 
