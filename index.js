@@ -66,9 +66,11 @@ app.post('/coffee', urlencodedParser, (req, res) => {
 
     // if its not neither increment the value
     if (reqBody.actions[0].value != 'neither') {
+        console.log(reqBody.actions[0].value);
         firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).update({ count: count + 1 });
     }
 
+    // Push to array 
     newEntry.set({ user: reqBody.user.name, choice: reqBody.actions[0].value, object: reqBody });
 
     var responseURL = reqBody.response_url
