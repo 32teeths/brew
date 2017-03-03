@@ -12,7 +12,7 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 var firebase = require("firebase");
 var moment = require('moment');
 
-var count ;
+var count;
 
 // Firebase Config
 // Initialize Firebase
@@ -66,7 +66,7 @@ app.post('/coffee', urlencodedParser, (req, res) => {
 
     // if its not neither increment the value
     if (reqBody.actions[0].value != 'neither') {
-        firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).update(count + 1);
+        firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).update({ count: count + 1 });
     }
 
     newEntry.set({ user: reqBody.user.name, choice: reqBody.actions[0].value, object: reqBody });
