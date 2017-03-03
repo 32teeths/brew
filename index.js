@@ -57,6 +57,8 @@ app.post('/coffee', urlencodedParser, (req, res) => {
 
     // Todays list
     var newEntry = firebase.database().ref(base_url).push();
+    
+    var count = 0;
 
     // Get and Save total count for today
     firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).once('value').then(function (snapshot) {
@@ -66,7 +68,7 @@ app.post('/coffee', urlencodedParser, (req, res) => {
 
     // if its not neither increment the value
     if (reqBody.actions[0].value != 'neither') {
-        console.log(reqBody.actions[0].value);
+        console.log(count,'count');
         firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).update({ count: count + 1 });
     }
 
