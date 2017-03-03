@@ -47,32 +47,35 @@ app.get('/OAuth', (req, res) => {
     })
 });
 
+// interactive buttons hit this url
 app.post('/coffee', urlencodedParser, (req, res) => {
     var reqBody = JSON.parse(req.body.payload);
-    res.status(200).end() // best practice to respond with 200 status
+    res.status(200).end() // respond with 200
+
+    // base url is appended with todays date
+    var base_url = 'coffee_times/' + moment().format('DD-MM-YYYY');
 
     // Todays list
-    var newEntry = firebase.database().ref('coffee_times/' + moment().format('DD-MM-YYYY')).push();
+    var newEntry = firebase.database().ref(base_url).push();
+
+    // Get and Save total count for today
+    firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).once('value').then(function (snapshot) {
+        var count = snapshot.val() || 0;
+        console.log(snapshot.val());
+    });
+
+    // if its not neither increment the value
+    if (reqBody.actions[0].value != 'neither') {
+        firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).update(count + 1);
+    }
+
     newEntry.set({ user: reqBody.user.name, choice: reqBody.actions[0].value, object: reqBody });
 
     var responseURL = reqBody.response_url
     if (validRequest(reqBody, res)) {
         sendMessageToSlackResponseURL(responseURL, { replace_original: true, text: 'Well , hello that is saved' });
-
         var url = 'https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=C3J6S2HGB&text=Helo&pretty=1';
-
         request.get(url);
-
-        // // Find the people in the slack channel
-        // request.get('https://slack.com/api/channels.info?token=' + process.env.token + '&channel=C3J6S2HGB&pretty=1', function (error, response) {
-        //     // Iterating throught the members
-        //     for (var key = 0; key < response.channel.members.length - 1; key++) {
-        //         // Open the channel for each user 
-        //         request.get('https://slack.com/api/im.open?token=' + process.env.token + '&user=' + response.channel.members[key] + '&pretty=1', function (error, response) {
-
-        //         });
-        //     }
-        // });
     }
 });
 
@@ -82,8 +85,9 @@ app.post('/ask', urlencodedParser, (req, res) => {
     var responseURL = reqBody.response_url;
 
     if (validRequest(reqBody, res)) {
+
+        // interactive buttons
         var message = {
-            "token": process.env.token,
             "text": "Hello Hero , Fancy a cup of coffee or tea",
             "attachments": [
                 {
@@ -119,24 +123,19 @@ app.post('/ask', urlencodedParser, (req, res) => {
 
         // Find the people in the general channel
         request.get('https://slack.com/api/channels.info?token=' + process.env.token + '&channel=C3J6S2HGB&pretty=1', function (error, status, response) {
-
+            // Get all the members in the general channel
             var members = JSON.parse(response).channel.members;
-            for (var key = 0; key < members.length; key++) {
+            // iterate throught the members 
+            members.forEach(function (member) {
                 // Open the channel for each user
-                request.get('https://slack.com/api/im.open?token=' + process.env.token + '&user=' + members[key] + '&pretty=1', function (error, status, response) {
+                request.get('https://slack.com/api/im.open?token=' + process.env.token + '&user=' + member + '&pretty=1', function (error, status, response) {
                     // Send the interactive buttons
-                    // request.post('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id + '&text=Sending message to ' + JSON.parse(response).channel.id + '&pretty=1', message, function (error, status, response) {
-
-                    console.log("sending message to ", JSON.parse(response).channel);
-                    message.channel = JSON.parse(response).channel.id;
                     request.get('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id + '&attachments=' + encodeURIComponent(JSON.stringify(message.attachments)), function (error, status, response) {
-
                         console.log(response);
-
-
                     })
                 });
-            }
+
+            })
         });
         // sendMessageToSlackResponseURL(responseURL, message)
     }
