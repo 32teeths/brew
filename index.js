@@ -1,7 +1,6 @@
 /*
 Brew is an attempt to build a bot using the Slack api
 Have used Firebase to store the content 
-
 */
 
 var express = require('express')
@@ -13,6 +12,7 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 var firebase = require("firebase");
 var moment = require('moment');
 
+var count ;
 
 // Firebase Config
 // Initialize Firebase
@@ -60,7 +60,7 @@ app.post('/coffee', urlencodedParser, (req, res) => {
 
     // Get and Save total count for today
     firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).once('value').then(function (snapshot) {
-        var count = snapshot.val() || 0;
+        count = snapshot.val() || 0;
         console.log(snapshot.val());
     });
 
