@@ -60,17 +60,16 @@ app.post('/coffee', urlencodedParser, (req, res) => {
     var newEntry = firebase.database().ref(base_url).push();
 
     // Get and Save total count for today
-    firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).once('value').then(function (snapshot) {
-        count = snapshot.val() || 0;
+    firebase.database().ref(base_url + '/count').once('value').then(function (snapshot) {
+        count = snapshot.val() || {};
 
 
         console.log(snapshot.val(), 'is the snapshot val');
 
         // if its not neither increment the value
         if (reqBody.actions[0].value != 'neither') {
-
             count[reqBody.actions[0].value]++;
-            console.log(count[reqBody.actions[0].value]);
+            console.log(count);
             firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).update(count);
         }
     });
