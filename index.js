@@ -63,15 +63,18 @@ app.post('/coffee', urlencodedParser, (req, res) => {
     firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).once('value').then(function (snapshot) {
         count = snapshot.val() || 0;
 
+
         console.log(snapshot.val(), 'is the snapshot val');
 
+        // if its not neither increment the value
+        if (reqBody.actions[0].value != 'neither') {
+
+            count[reqBody.actions[0].value]++;
+            console.log(count[reqBody.actions[0].value]);
+            firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).update(count);
+        }
     });
 
-    // if its not neither increment the value
-    if (reqBody.actions[0].value != 'neither') {
-        console.log(count, 'count');
-        firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).update({ count: count + 1 });
-    }
 
     // Push to array 
     newEntry.set({ user: reqBody.user.name, choice: reqBody.actions[0].value, object: reqBody });
