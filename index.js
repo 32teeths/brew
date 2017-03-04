@@ -57,7 +57,7 @@ app.post('/coffee', urlencodedParser, (req, res) => {
 
     // Todays list
     var newEntry = firebase.database().ref(base_url).push();
-    
+
     var count = 0;
 
     // Get and Save total count for today
@@ -68,7 +68,7 @@ app.post('/coffee', urlencodedParser, (req, res) => {
 
     // if its not neither increment the value
     if (reqBody.actions[0].value != 'neither') {
-        console.log(count,'count');
+        console.log(count, 'count');
         firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).update({ count: count + 1 });
     }
 
@@ -92,6 +92,7 @@ app.post('/ask', urlencodedParser, (req, res) => {
 
         // interactive buttons
         var message = {
+            "token": process.env.token,
             "text": "Hello Hero , Fancy a cup of coffee or tea",
             "attachments": [
                 {
@@ -134,7 +135,9 @@ app.post('/ask', urlencodedParser, (req, res) => {
                 // Open the channel for each user
                 request.get('https://slack.com/api/im.open?token=' + process.env.token + '&user=' + member + '&pretty=1', function (error, status, response) {
                     // Send the interactive buttons
-                    request.get('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id + '&attachments=' + encodeURIComponent(JSON.stringify(message.attachments)), function (error, status, response) {
+                    message.channel = JSON.parse(response).channel.id;
+                    request.post('https://slack.com/api/chat.postMessage', { form: message }, function (error, status, response) {
+                        // request.get('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id + '&attachments=' + encodeURIComponent(JSON.stringify(message.attachments)), function (error, status, response) {
                         console.log(response);
                     })
                 });
