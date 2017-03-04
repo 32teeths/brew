@@ -91,7 +91,7 @@ app.post('/ask', urlencodedParser, (req, res) => {
 
 
     // Get and Save total count for today
-    firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).once('value').then(function (snapshot) {
+    firebase.database().ref(base_url + '/count/').once('value').then(function (snapshot) {
         count = snapshot.val() || 0;
 
         console.log(snapshot.val(), 'is the snapshot val');
