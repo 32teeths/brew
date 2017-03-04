@@ -14,6 +14,10 @@ var moment = require('moment');
 
 var count;
 
+// base url is appended with todays date
+var base_url = 'coffee_times/' + moment().format('DD-MM-YYYY');
+
+
 // Firebase Config
 // Initialize Firebase
 console.log(JSON.parse(process.env.firebaseConfig));
@@ -52,9 +56,6 @@ app.post('/coffee', urlencodedParser, (req, res) => {
     var reqBody = JSON.parse(req.body.payload);
     res.status(200).end() // respond with 200
 
-    // base url is appended with todays date
-    var base_url = 'coffee_times/' + moment().format('DD-MM-YYYY');
-
     // Todays list
     var newEntry = firebase.database().ref(base_url).push();
 
@@ -62,7 +63,7 @@ app.post('/coffee', urlencodedParser, (req, res) => {
     firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).once('value').then(function (snapshot) {
         count = snapshot.val() || 0;
 
-        console.log(snapshot.val(),'is the snapshot val');
+        console.log(snapshot.val(), 'is the snapshot val');
 
     });
 
@@ -93,7 +94,7 @@ app.post('/ask', urlencodedParser, (req, res) => {
     firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).once('value').then(function (snapshot) {
         count = snapshot.val() || 0;
 
-        console.log(snapshot.val(),'is the snapshot val');
+        console.log(snapshot.val(), 'is the snapshot val');
     });
 
 
