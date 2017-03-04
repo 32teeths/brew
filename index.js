@@ -68,6 +68,7 @@ app.post('/coffee', urlencodedParser, (req, res) => {
 
         // if its not neither increment the value
         if (reqBody.actions[0].value != 'neither') {
+            count[reqBody.actions[0].value] = count[reqBody.actions[0].value]||0;
             count[reqBody.actions[0].value]++;
             console.log(count);
             firebase.database().ref(base_url + '/count/' + reqBody.actions[0].value).update(count);
