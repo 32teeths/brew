@@ -83,15 +83,17 @@ app.post('/choice', urlencodedParser, (req, res) => {
                         // Save the count to firebase
                         console.log(count, 'is the value before posting');
 
-                        firebase.database().ref(base_url + '/count').update(count);
-
                     });
                 } else {
                     var url = 'https://slack.com/api/chat.update?token=' + process.env.token + '&channel=C3J6S2HGB&ts=' + count.ts + '&text=' + encodeURIComponent(JSON.stringify(message.text)) + '&pretty=1';
-                        console.log(count, 'is the value before updating');
+                    console.log(count, 'is the value before updating');
 
-                    request.get(url);
+                    request.get(url, function (status, response, body) {
+                        console.log(body, 'updated message');
+                    });
                 }
+
+                firebase.database().ref(base_url + '/count').update(count);
 
                 // This should be chat.update , update the count on the N
                 res.status(200).end() // respond with 200
