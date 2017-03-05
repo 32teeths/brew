@@ -13,9 +13,6 @@ var firebase = require("firebase");
 var moment = require('moment');
 var count;
 
-// base url is appended with todays date
-var base_url = 'coffee_times/' + moment().format('DD-MM-YYYY');
-
 // Initialize Firebase
 firebase.initializeApp(JSON.parse(process.env.firebaseConfig));
 
@@ -46,6 +43,10 @@ app.get('/OAuth', (req, res) => {
 // any actions on interactive buttons hit this url
 app.post('/choice', urlencodedParser, (req, res) => {
     var reqBody = JSON.parse(req.body.payload);
+
+    // base url is appended with todays date
+    var base_url = 'coffee_times/' + moment().format('DD-MM-YYYY');
+
     // Validate the request
     if (validRequest(reqBody, res)) {
 
@@ -64,16 +65,34 @@ app.post('/choice', urlencodedParser, (req, res) => {
                 count[reqBody.actions[0].value] = count[reqBody.actions[0].value] || 0;
                 count[reqBody.actions[0].value]++;
                 console.log(count);
-                firebase.database().ref(base_url + '/count').update(count);
+
+                var message = {
+                    "text": count.coffee + "Coffee and " + count.tea + " Tea will be served. \n Good Day guys! "
+                }
+
+                var responseURL = reqBody.response_url
+                sendMessageToSlackResponseURL(responseURL, { replace_original: true, text: 'Roger that!.' });
+
+                // for the first time we should postMessage , else update
+                if (!count.ts) {
+                    var url = 'https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=C3J6S2HGB&text=' + encodeURIComponent(JSON.stringify(message.text)) + '&pretty=1';
+                    request.get(url).on('response', function (response) {
+                        // save the timestamp of the message for update
+                        count.ts = response.ts;
+                        // Save the count to firebase
+                        firebase.database().ref(base_url + '/count').update(count);
+
+                    });
+                } else {
+                    var url = 'https://slack.com/api/chat.update?token=' + process.env.token + '&channel=C3J6S2HGB&ts=' + count.ts + '&text=' + encodeURIComponent(JSON.stringify(message.text)) + '&pretty=1';
+                    request.get(url);
+                }
+
+                // This should be chat.update , update the count on the N
+                res.status(200).end() // respond with 200
             }
         });
 
-        var responseURL = reqBody.response_url
-        sendMessageToSlackResponseURL(responseURL, { replace_original: true, text: 'Well , hello that is saved' });
-        var url = 'https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=C3J6S2HGB&text=Helo&pretty=1';
-        request.get(url);
-        // This should be chat.update , update the count on the N
-        res.status(200).end() // respond with 200
     }
 });
 
@@ -92,7 +111,7 @@ app.post('/ask', urlencodedParser, (req, res) => {
 
 // API to trigger the interactive button
 app.get('/trigger', urlencodedParser, (req, res) => {
-    sendButtons('C3J6S2HGB');
+    sendButtons('C3J6S2HGB');//C3J6S2HGB is the channel of general channel
     res.send('Buttons triggered');
 });
 
@@ -104,10 +123,10 @@ app.get('/trigger', urlencodedParser, (req, res) => {
 function sendButtons(channel) {
     // interactive buttons
     var message = {
-        "text": "Hello Hero , Fancy a cup of coffee or tea",
+        "text": "Hello there !, Fancy a cup of coffee/tea?",
         "attachments": [
             {
-                "text": "A Coffee a day keeps the sleepy head away",
+                "text": "Choose one , not both :) ",
                 "fallback": "Well, there are days it wouldnt work and unfortunately today is such a day.",
                 "callback_id": "button_tutorial",
                 "color": "#3AA3E3",
