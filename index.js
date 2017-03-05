@@ -76,12 +76,11 @@ app.post('/choice', urlencodedParser, (req, res) => {
                 // for the first time we should postMessage , else update
                 if (!count.ts) {
                     var url = 'https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=C3J6S2HGB&text=' + encodeURIComponent(JSON.stringify(message.text)) + '&pretty=1';
-                    request.get(url).on('response', function (status, response) {
-                        console.log(response);
+                    request.get(url, function (status, response, body) {
 
-                        console.log(status,'status');
+                        console.log(body, 'status');
                         // save the timestamp of the message for update
-                        count.ts = response.ts;
+                        count.ts = body.ts;
                         // Save the count to firebase
                         firebase.database().ref(base_url + '/count').update(count);
 
