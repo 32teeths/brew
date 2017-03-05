@@ -67,7 +67,7 @@ app.post('/choice', urlencodedParser, (req, res) => {
                 console.log(count);
 
                 var message = {
-                    "text": count.coffee + "Coffee and " + count.tea + " Tea will be served. \n Good Day guys! "
+                    "text": count.coffee + " Coffee and " + count.tea + " Tea will be served. \n Good Day guys! "
                 }
 
                 var responseURL = reqBody.response_url
@@ -76,7 +76,10 @@ app.post('/choice', urlencodedParser, (req, res) => {
                 // for the first time we should postMessage , else update
                 if (!count.ts) {
                     var url = 'https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=C3J6S2HGB&text=' + encodeURIComponent(JSON.stringify(message.text)) + '&pretty=1';
-                    request.get(url).on('response', function (response) {
+                    request.get(url).on('response', function (status, response) {
+                        console.log(reponse);
+
+                        console.log(status,'status');
                         // save the timestamp of the message for update
                         count.ts = response.ts;
                         // Save the count to firebase
