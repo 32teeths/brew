@@ -11,20 +11,13 @@ var urlencodedParser = bodyParser.urlencoded({ extended: false })
 
 var firebase = require("firebase");
 var moment = require('moment');
-
 var count;
 
 // base url is appended with todays date
 var base_url = 'coffee_times/' + moment().format('DD-MM-YYYY');
 
-
-// Firebase Config
 // Initialize Firebase
-console.log(JSON.parse(process.env.firebaseConfig));
-
 firebase.initializeApp(JSON.parse(process.env.firebaseConfig));
-
-console.log(firebase.app().name);  // "[DEFAULT]"
 
 // Endpoint to enable OAuth access for the app
 app.get('/OAuth', (req, res) => {
@@ -43,122 +36,122 @@ app.get('/OAuth', (req, res) => {
         if (!JSONresponse.ok) {
             res.send("Error encountered: \n" + JSON.stringify(JSONresponse)).status(200).end()
         } else {
-            console.log(response);
-            // firebase.database().ref('app/config').set(response);
-            console.log("Got success");
+            // Its better to store the token in firebase for later use
+            firebase.database().ref('app/config').set(response);
             res.send("Success!")
         }
     })
 });
 
-// interactive buttons hit this url
-app.post('/coffee', urlencodedParser, (req, res) => {
+// any actions on interactive buttons hit this url
+app.post('/choice', urlencodedParser, (req, res) => {
     var reqBody = JSON.parse(req.body.payload);
-    res.status(200).end() // respond with 200
-
-    // Todays list
-    var newEntry = firebase.database().ref(base_url).push();
-
-    // Get and Save total count for today
-    firebase.database().ref(base_url + '/count').once('value').then(function (snapshot) {
-        count = snapshot.val() || {};
-
-
-        console.log(snapshot.val(), 'is the snapshot val');
-
-        // if its not neither increment the value
-        if (reqBody.actions[0].value != 'neither') {
-            count[reqBody.actions[0].value] = count[reqBody.actions[0].value] || 0;
-            count[reqBody.actions[0].value]++;
-            console.log(count);
-            firebase.database().ref(base_url + '/count').update(count);
-        }
-    });
-
-
-    // Push to array 
-    newEntry.set({ user: reqBody.user.name, choice: reqBody.actions[0].value, object: reqBody });
-
-    var responseURL = reqBody.response_url
+    // Validate the request
     if (validRequest(reqBody, res)) {
+
+        // Todays list
+        var newEntry = firebase.database().ref(base_url).push();
+
+        // Push to array 
+        newEntry.set({ user: reqBody.user.name, choice: reqBody.actions[0].value, object: reqBody });
+
+        // Increment the count for the day
+        firebase.database().ref(base_url + '/count').once('value').then(function (snapshot) {
+            count = snapshot.val() || {};
+
+            // if its not neither increment the value
+            if (reqBody.actions[0].value != 'neither') {
+                count[reqBody.actions[0].value] = count[reqBody.actions[0].value] || 0;
+                count[reqBody.actions[0].value]++;
+                console.log(count);
+                firebase.database().ref(base_url + '/count').update(count);
+            }
+        });
+
+        var responseURL = reqBody.response_url
         sendMessageToSlackResponseURL(responseURL, { replace_original: true, text: 'Well , hello that is saved' });
         var url = 'https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=C3J6S2HGB&text=Helo&pretty=1';
         request.get(url);
+        // This should be chat.update , update the count on the N
+        res.status(200).end() // respond with 200
     }
 });
 
+// @todo this is triggered by a slash command , 
+// should instead be triggered by a scheduler
 app.post('/ask', urlencodedParser, (req, res) => {
-    res.status(200).end() // best practice to respond with empty 200 status code
     var reqBody = req.body
     var responseURL = reqBody.response_url;
 
-
-    // Get and Save total count for today
-    firebase.database().ref(base_url + '/count/').once('value').then(function (snapshot) {
-        count = snapshot.val() || 0;
-
-        console.log(snapshot.val(), 'is the snapshot val');
-    });
-
-
-
     if (validRequest(reqBody, res)) {
-
-        // interactive buttons
-        var message = {
-            "text": "Hello Hero , Fancy a cup of coffee or tea",
-            "attachments": [
-                {
-                    "text": "A Coffee a day keeps the sleepy head away",
-                    "fallback": "Well, there are days it wouldnt work and unfortunately today is such a day.",
-                    "callback_id": "button_tutorial",
-                    "color": "#3AA3E3",
-                    "attachment_type": "default",
-                    "actions": [
-                        {
-                            "name": "yes",
-                            "text": "Coffee",
-                            "type": "button",
-                            "value": "coffee"
-                        },
-                        {
-                            "name": "no",
-                            "text": "Tea",
-                            "type": "button",
-                            "value": "tea"
-                        },
-                        {
-                            "name": "maybe",
-                            "text": "Neither",
-                            "type": "button",
-                            "value": "neither",
-                            "style": "danger"
-                        }
-                    ]
-                }
-            ]
-        }
-
-        // Find the people in the general channel
-        request.get('https://slack.com/api/channels.info?token=' + process.env.token + '&channel=C3J6S2HGB&pretty=1', function (error, status, response) {
-            // Get all the members in the general channel
-            var members = JSON.parse(response).channel.members;
-            // iterate throught the members 
-            members.forEach(function (member) {
-                // Open the channel for each user
-                request.get('https://slack.com/api/im.open?token=' + process.env.token + '&user=' + member + '&pretty=1', function (error, status, response) {
-                    // Send the interactive buttons
-                    // request.post('https://slack.com/api/chat.postMessage', { form: message }, function (error, status, response) {
-                    request.get('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id + '&attachments=' + encodeURIComponent(JSON.stringify(message.attachments)), function (error, status, response) {
-                        console.log(response);
-                    })
-                });
-
-            })
-        });
-        // sendMessageToSlackResponseURL(responseURL, message)
+        // Send buttons to everybody in the channel
+        sendButtons('C3J6S2HGB');
+        res.status(200).end();
     }
 });
+
+// API to trigger the interactive button
+app.get('/trigger', urlencodedParser, (req, res) => {
+    sendButtons('C3J6S2HGB');
+});
+
+/**
+ * Function will send interactive buttons to everybody in the channel
+ * 
+ * @param {any} channel
+ */
+function sendButtons(channel) {
+    // interactive buttons
+    var message = {
+        "text": "Hello Hero , Fancy a cup of coffee or tea",
+        "attachments": [
+            {
+                "text": "A Coffee a day keeps the sleepy head away",
+                "fallback": "Well, there are days it wouldnt work and unfortunately today is such a day.",
+                "callback_id": "button_tutorial",
+                "color": "#3AA3E3",
+                "attachment_type": "default",
+                "actions": [
+                    {
+                        "name": "yes",
+                        "text": "Coffee",
+                        "type": "button",
+                        "value": "coffee"
+                    },
+                    {
+                        "name": "no",
+                        "text": "Tea",
+                        "type": "button",
+                        "value": "tea"
+                    },
+                    {
+                        "name": "maybe",
+                        "text": "Neither",
+                        "type": "button",
+                        "value": "neither",
+                        "style": "danger"
+                    }
+                ]
+            }
+        ]
+    }
+
+    // Find the people in the general channel
+    request.get('https://slack.com/api/channels.info?token=' + process.env.token + '&channel=' + channel + '&pretty=1', function (error, status, response) {
+        // Get all the members in the general channel
+        var members = JSON.parse(response).channel.members;
+        // iterate throught the members 
+        members.forEach(function (member) {
+            // Open the channel for each user
+            request.get('https://slack.com/api/im.open?token=' + process.env.token + '&user=' + member + '&pretty=1', function (error, status, response) {
+                // Send the interactive buttons
+                request.get('https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=' + JSON.parse(response).channel.id + '&attachments=' + encodeURIComponent(JSON.stringify(message.attachments)), function (error, status, response) {
+                    // Buttons send to every person in the channel .
+                })
+            });
+        });
+    });
+}
 
 /**
  * Function will post the JSON message to the response_url
