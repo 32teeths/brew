@@ -80,7 +80,7 @@ app.post('/choice', urlencodedParser, (req, res) => {
 
                         console.log(body, 'status');
                         // save the timestamp of the message for update
-                        count.ts = body.ts;
+                        count.ts = JSON.parse(body).ts;
                         // Save the count to firebase
                         firebase.database().ref(base_url + '/count').update(count);
 
