@@ -45,7 +45,7 @@ app.post('/choice', urlencodedParser, (req, res) => {
     var reqBody = JSON.parse(req.body.payload);
 
     // base url is appended with todays date
-    var base_url = 'coffee_times/' + moment().format('DD-MM-YYYY');
+    var base_url = 'day/' + moment().format('DD-MM-YYYY');
 
     // Validate the request
     if (validRequest(reqBody, res)) {
@@ -59,18 +59,18 @@ app.post('/choice', urlencodedParser, (req, res) => {
         // Increment the count for the day
         firebase.database().ref(base_url + '/count').once('value').then(function (snapshot) {
             count = snapshot.val() || {};
-            console.log(count, 'is the value from the db');
             // if its not neither increment the value
             if (reqBody.actions[0].value != 'neither') {
                 count[reqBody.actions[0].value] = count[reqBody.actions[0].value] || 0;
                 count[reqBody.actions[0].value]++;
-                console.log(count, 'is the value after increment');
 
+                // Message that will send to channel
                 var message = {
-                    "text": count.coffee + " Coffee and " + count.tea + " Tea will be served. \n Good Day guys! "
+                    "text": count.coffee + " Coffee and " + count.tea + " Tea will be served. \nGood Day guys! "
                 }
 
                 var responseURL = reqBody.response_url
+                // send message to channel
                 sendMessageToSlackResponseURL(responseURL, { replace_original: true, text: 'Roger that!.' });
 
                 // for the first time we should postMessage , else update
@@ -81,27 +81,58 @@ app.post('/choice', urlencodedParser, (req, res) => {
                         // save the timestamp of the message for update
                         count.ts = JSON.parse(body).ts;
                         // Save the count to firebase
-                        console.log(count, 'is the value before posting');
-
+                        firebase.database().ref(base_url + '/count').update(count);
                     });
                 } else {
                     var url = 'https://slack.com/api/chat.update?token=' + process.env.token + '&channel=C3J6S2HGB&ts=' + count.ts + '&text=' + encodeURIComponent(JSON.stringify(message.text)) + '&pretty=1';
-                    console.log(count, 'is the value before updating');
-
+                    // Update the message on channel
                     request.get(url, function (status, response, body) {
-                        console.log(body, 'updated message');
+                        firebase.database().ref(base_url + '/count').update(count);
                     });
                 }
-
-                firebase.database().ref(base_url + '/count').update(count);
-
-                // This should be chat.update , update the count on the N
-                res.status(200).end() // respond with 200
             }
+            res.status(200).end() // respond with 200
         });
-
     }
 });
+
+/**
+ * Function will post the JSON message to the response_url
+ * 
+ * @param {any} responseURL
+ * @param {any} JSONmessage
+ */
+function sendMessageToSlackResponseURL(responseURL, JSONmessage) {
+    var postOptions = {
+        uri: responseURL,
+        method: 'POST',
+        headers: {
+            'Content-type': 'application/json'
+        },
+        json: JSONmessage
+    }
+    return request(postOptions, (error, response, body) => {
+        if (error) {
+            // handle errors as you see fit
+        }
+    })
+};
+
+/**
+ * Function validates every request
+ * 
+ * @param {any} reqBody
+ * @param {any} res
+ */
+function validRequest(reqBody, res) {
+    if (reqBody.token != process.env.verificationToken) {
+        res.status(403).end("Access forbidden")
+        return false;
+    } else {
+        return true
+    }
+}
+
 
 // @todo this is triggered by a slash command , 
 // should instead be triggered by a scheduler
@@ -180,43 +211,6 @@ function sendButtons(channel) {
     });
 }
 
-/**
- * Function will post the JSON message to the response_url
- * 
- * @param {any} responseURL
- * @param {any} JSONmessage
- */
-function sendMessageToSlackResponseURL(responseURL, JSONmessage) {
-    var postOptions = {
-        uri: responseURL,
-        method: 'POST',
-        headers: {
-            'Content-type': 'application/json'
-        },
-        json: JSONmessage
-    }
-    return request(postOptions, (error, response, body) => {
-        if (error) {
-            // handle errors as you see fit
-        }
-    })
-};
-
-/**
- * Function validates every request
- * 
- * @param {any} reqBody
- * @param {any} res
- */
-function validRequest(reqBody, res) {
-    console.log(reqBody.token, process.env.verificationToken);
-    if (reqBody.token != process.env.verificationToken) {
-        res.status(403).end("Access forbidden")
-        return false;
-    } else {
-        return true
-    }
-}
 
 // Start listening  
 app.listen(process.env.PORT || 8000);
