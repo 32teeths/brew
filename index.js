@@ -59,12 +59,12 @@ app.post('/choice', urlencodedParser, (req, res) => {
         // Increment the count for the day
         firebase.database().ref(base_url + '/count').once('value').then(function (snapshot) {
             count = snapshot.val() || {};
-
+            console.log(count, 'is the value from the db');
             // if its not neither increment the value
             if (reqBody.actions[0].value != 'neither') {
                 count[reqBody.actions[0].value] = count[reqBody.actions[0].value] || 0;
                 count[reqBody.actions[0].value]++;
-                console.log(count);
+                console.log(count, 'is the value after increment');
 
                 var message = {
                     "text": count.coffee + " Coffee and " + count.tea + " Tea will be served. \n Good Day guys! "
@@ -78,15 +78,18 @@ app.post('/choice', urlencodedParser, (req, res) => {
                     var url = 'https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=C3J6S2HGB&text=' + encodeURIComponent(JSON.stringify(message.text)) + '&pretty=1';
                     request.get(url, function (status, response, body) {
 
-                        console.log(body, 'status');
                         // save the timestamp of the message for update
                         count.ts = JSON.parse(body).ts;
                         // Save the count to firebase
+                        console.log(count, 'is the value before posting');
+
                         firebase.database().ref(base_url + '/count').update(count);
 
                     });
                 } else {
                     var url = 'https://slack.com/api/chat.update?token=' + process.env.token + '&channel=C3J6S2HGB&ts=' + count.ts + '&text=' + encodeURIComponent(JSON.stringify(message.text)) + '&pretty=1';
+                        console.log(count, 'is the value before updating');
+
                     request.get(url);
                 }
 
