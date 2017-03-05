@@ -77,7 +77,7 @@ app.post('/choice', urlencodedParser, (req, res) => {
                 if (!count.ts) {
                     var url = 'https://slack.com/api/chat.postMessage?token=' + process.env.token + '&channel=C3J6S2HGB&text=' + encodeURIComponent(JSON.stringify(message.text)) + '&pretty=1';
                     request.get(url).on('response', function (status, response) {
-                        console.log(reponse);
+                        console.log(response);
 
                         console.log(status,'status');
                         // save the timestamp of the message for update
