@@ -51,7 +51,7 @@ app.post('/choice', urlencodedParser, (req, res) => {
     if (validRequest(reqBody, res)) {
 
         // Todays list
-        var newEntry = firebase.database().ref(base_url).push();
+        var newEntry = firebase.database().ref(base_url + '/people').push();
 
         // Push to array 
         newEntry.set({ time: moment().format(), user: reqBody.user.name, choice: reqBody.actions[0].value, object: reqBody });
