@@ -45,7 +45,7 @@ app.post('/choice', urlencodedParser, (req, res) => {
     var reqBody = JSON.parse(req.body.payload);
 
     // base url is appended with todays date
-    var base_url = 'day/' + moment().format('DD-MM-YYYY');
+    var base_url = 'month/' + moment.format('YYYY-MM') + '/day/' + moment().format('YYYY-MM-DD');
 
     // Validate the request
     if (validRequest(reqBody, res)) {
@@ -54,7 +54,7 @@ app.post('/choice', urlencodedParser, (req, res) => {
         var newEntry = firebase.database().ref(base_url).push();
 
         // Push to array 
-        newEntry.set({ user: reqBody.user.name, choice: reqBody.actions[0].value, object: reqBody });
+        newEntry.set({ time: moment.format(), user: reqBody.user.name, choice: reqBody.actions[0].value, object: reqBody });
 
         // Increment the count for the day
         firebase.database().ref(base_url + '/count').once('value').then(function (snapshot) {
