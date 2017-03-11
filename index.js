@@ -150,7 +150,7 @@ app.post('/ask', urlencodedParser, (req, res) => {
 // API to trigger the interactive button
 app.get('/trigger', urlencodedParser, (req, res) => {
     sendButtons('C3J6S2HGB');//C3J6S2HGB is the channel of general channel
-    res.send('Buttons triggered');
+    res.send('Buttons triggered').status(200).end();
 });
 
 /**
