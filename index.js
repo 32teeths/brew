@@ -54,7 +54,7 @@ app.post('/choice', urlencodedParser, (req, res) => {
         var newEntry = firebase.database().ref(base_url).push();
 
         // Push to array 
-        newEntry.set({ time: moment.format(), user: reqBody.user.name, choice: reqBody.actions[0].value, object: reqBody });
+        newEntry.set({ time: moment().format(), user: reqBody.user.name, choice: reqBody.actions[0].value, object: reqBody });
 
         // Increment the count for the day
         firebase.database().ref(base_url + '/count').once('value').then(function (snapshot) {
