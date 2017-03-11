@@ -45,7 +45,7 @@ app.post('/choice', urlencodedParser, (req, res) => {
     var reqBody = JSON.parse(req.body.payload);
 
     // base url is appended with todays date
-    var base_url = 'month/' + moment.format('YYYY-MM') + '/day/' + moment().format('YYYY-MM-DD');
+    var base_url = 'month/' + moment().format('YYYY-MM') + '/day/' + moment().format('YYYY-MM-DD');
 
     // Validate the request
     if (validRequest(reqBody, res)) {
